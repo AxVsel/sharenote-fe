@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 import { AuthProvider } from "../../provider/authProvider"; // pastikan path sesuai
+import { useAuth } from "../../hooks/useAuth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +30,56 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {/* HEADER */}
+          <header className="bg-white shadow-md w-full h-14 flex justify-between items-center px-6">
+            {/* Kiri: Logo + Menu */}
+            <div className="flex items-center gap-6">
+              {/* Logo */}
+              <img
+                src="/logo-name.png"
+                alt="Logo"
+                className="w-40 h-auto object-contain"
+              />
+
+              {/* Menu Buttons */}
+              <nav className="flex gap-3">
+                <Link
+                  href="/"
+                  className=" text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/note"
+                  className=" text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
+                >
+                  YourNote
+                </Link>
+
+                <Link
+                  href="/shareNote"
+                  className=" text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
+                >
+                  ShareNote
+                </Link>
+              </nav>
+            </div>
+
+            {/* Kanan: Placeholder misalnya Username */}
+            <div className="flex gap-3 text-gray-700 font-medium">
+              <button className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out">
+                Login
+              </button>
+              <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out">
+                Logout
+              </button>
+            </div>
+          </header>
+
+          {/* MAIN CONTENT */}
+          <main>{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

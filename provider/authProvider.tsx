@@ -8,19 +8,16 @@ import axios from "../services/axios";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const login = async (identifier: string, password: string) => {
+  const login = async (identifier: string, passwordHash: string) => {
     try {
       const response = await axios.post("/auth/login", {
         identifier,
-        password,
+        passwordHash,
       });
-
       // Token sudah di cookie httpOnly, tapi kalau mau simpan juga bisa ambil dari response
       const { token } = response.data.user;
-
       // Simpan token di localStorage (optional, tapi backend juga set cookie)
       localStorage.setItem("token", token);
-
       setIsAuthenticated(true);
     } catch (error) {
       console.error("Login gagal", error);
@@ -38,9 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       headers: { "Content-Type": "application/json" },
     });
     const { token } = response.data.user;
-
     localStorage.setItem("token", token);
-
     setIsAuthenticated(true);
   };
 
