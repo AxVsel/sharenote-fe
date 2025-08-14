@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../../context/authContext";
-import GuestRoute from "@/app/components/GuestRoute";
+import GuestRoute from "@/app/protect/GuestRoute";
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");

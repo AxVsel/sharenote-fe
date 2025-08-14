@@ -32,19 +32,25 @@ export default function Header() {
             href="/home"
             className="text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
           >
-            Dashboard
+            Home
           </Link>
           <Link
-            href="/note"
+            href="/YourNote"
             className="text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
           >
             YourNote
           </Link>
           <Link
-            href="/shareNote"
+            href="/YourShare"
             className="text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
           >
-            ShareNote
+            YourShare
+          </Link>
+          <Link
+            href="/Share"
+            className="text-zinc-800 px-4 py-2 rounded-md font-semibold transition"
+          >
+            Share
           </Link>
         </nav>
       </div>

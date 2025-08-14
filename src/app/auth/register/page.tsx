@@ -4,7 +4,7 @@ import { useState, useContext } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../../context/authContext";
-import GuestRoute from "@/app/components/GuestRoute";
+import GuestRoute from "@/app/protect/GuestRoute";
 
 export default function Register() {
   const { register } = useContext(AuthContext);

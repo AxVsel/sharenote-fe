@@ -1,4 +1,4 @@
-import ProtectedRoute from "../components/ProtectRoute";
+import ProtectedRoute from "../protect/ProtectRoute";
 
 export default function ShareNote() {
   return (
