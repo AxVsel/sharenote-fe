@@ -54,6 +54,24 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const updateSharedTodo = useCallback(
+    async (id: number, updates: Partial<Todo>) => {
+      try {
+        const payload = {
+          ...updates,
+          dueDate: updates.dueDate ? new Date(updates.dueDate) : null,
+        };
+        const res = await axios.put(`/todos-share/${id}`, payload); // panggil endpoint shared todo
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, ...res.data } : t))
+        );
+      } catch (error) {
+        console.error("Gagal update shared todo:", error);
+      }
+    },
+    []
+  );
+
   return (
     <NoteContext.Provider
       value={{
@@ -63,6 +81,7 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
         addTodo,
         deleteTodo,
         updateTodo,
+        updateSharedTodo,
       }}
     >
       {children}

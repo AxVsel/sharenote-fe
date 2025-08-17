@@ -6,10 +6,12 @@ import { useEffect } from "react";
 import { AddNote } from "./add/noteAdd";
 import { EditNote } from "./edit/noteEdit";
 import { ShareTodo } from "./share/ShareTodo";
+import { ShareContext } from "../../../context/shareContext";
+
 import Swal from "sweetalert2";
 
 export default function Note() {
-  const { todos, fetchTodos, deleteTodo } = useNote();
+  const { todos, fetchTodos, deleteTodo, loading } = useNote();
 
   useEffect(() => {
     fetchTodos();
@@ -105,7 +107,9 @@ export default function Note() {
                     {priorityLabel}
                   </span>
                   <span className="text-xs text-gray-500">
-                    {todo.dueDate ? `Due: ${todo.dueDate}` : "No due date"}
+                    {todo.dueDate
+                      ? `Due: ${new Date(todo.dueDate).toLocaleDateString()}`
+                      : "No due date"}
                   </span>
                 </div>
 

@@ -1,16 +1,46 @@
 "use client";
 
+import Swal from "sweetalert2";
 import { useEffect, useContext } from "react";
 import ProtectedRoute from "../protect/ProtectRoute";
-import { ShareTodo } from "./edit/noteEdit";
+import { ShareEdit } from "./edit/shreEdit";
 import { ShareContext } from "../../../context/shareContext";
 
 export default function YourShare() {
-  const { fetchYourShare, yourShareTodos, loading } = useContext(ShareContext);
+  const { fetchYourShare, yourShareTodos, loading, unshareTodo } =
+    useContext(ShareContext);
 
   useEffect(() => {
     fetchYourShare();
   }, [fetchYourShare]);
+
+  const handleUnshare = async (shareId: number) => {
+    try {
+      const result = await Swal.fire({
+        title: "Yakin ingin unshare?",
+        text: "Todo akan dihapus dari daftar shared user.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Unshare!",
+        cancelButtonText: "Batal",
+      });
+
+      if (result.isConfirmed) {
+        await unshareTodo(shareId);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Todo berhasil di-unshare.",
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Terjadi kesalahan saat unshare todo.",
+      });
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -58,11 +88,13 @@ export default function YourShare() {
                         : "Low Priority"}
                     </span>
                     <span className="text-xs text-gray-500">
-                      Due: {todo.dueDate}
+                      {todo.dueDate
+                        ? `Due: ${new Date(todo.dueDate).toLocaleDateString()}`
+                        : "No due date"}
                     </span>
                   </div>
                   <div className="flex justify-end gap-2 mt-5">
-                    <ShareTodo
+                    <ShareEdit
                       todoId={todo.id}
                       sharedWithUserId={
                         todo.sharedWith.length > 0
@@ -70,9 +102,14 @@ export default function YourShare() {
                           : undefined
                       }
                     />
-
-                    <button className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition">
-                      Delete
+                    <button
+                      onClick={() =>
+                        todo.sharedWith.length > 0 &&
+                        handleUnshare(todo.sharedWith[0].id)
+                      }
+                      className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+                    >
+                      Unshare
                     </button>
                   </div>
                 </div>

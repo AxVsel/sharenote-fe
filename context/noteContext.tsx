@@ -18,6 +18,7 @@ export type NoteContextType = {
   addTodo: (data: Omit<Todo, "id" | "isCompleted">) => Promise<void>;
   deleteTodo: (id: number) => Promise<void>;
   updateTodo: (id: number, updates: Partial<Todo>) => Promise<void>;
+  updateSharedTodo: (id: number, updates: Partial<Todo>) => Promise<void>;
 };
 
 export const NoteContext = createContext<NoteContextType>({
@@ -27,4 +28,5 @@ export const NoteContext = createContext<NoteContextType>({
   addTodo: async () => {},
   deleteTodo: async () => {},
   updateTodo: async () => {},
+  updateSharedTodo: async () => {},
 });
