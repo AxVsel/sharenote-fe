@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useNote } from "../../../../hooks/useNote";
+import Swal from "sweetalert2"; // ✅ import SweetAlert2
 
 export function AddNote() {
   const { addTodo, fetchTodos } = useNote();
@@ -46,8 +47,24 @@ export function AddNote() {
       await fetchTodos();
       setFormData({ title: "", description: "", dueDate: "", priority: 0 });
       setOpen(false);
+
+      // ✅ SweetAlert sukses
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Catatan berhasil ditambahkan!",
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (err) {
       console.error("Gagal menambahkan todo", err);
+
+      // ✅ SweetAlert error
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Terjadi kesalahan saat menambahkan catatan.",
+      });
     }
   };
 

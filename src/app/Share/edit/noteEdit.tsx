@@ -16,6 +16,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { useNote } from "../../../../hooks/useNote";
+import { useShare } from "../../../../hooks/useShare";
+import Swal from "sweetalert2"; // ✅ Import SweetAlert2
 
 type TodoFormProps = {
   todo: {
@@ -30,7 +32,8 @@ type TodoFormProps = {
 };
 
 export function EditNote({ todo, onClose }: TodoFormProps) {
-  const { updateTodo, fetchTodos } = useNote();
+  const { updateTodo } = useNote();
+  const { fetchSharedToMe } = useShare();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -74,13 +77,30 @@ export function EditNote({ todo, onClose }: TodoFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       await updateTodo(todo.id, formData);
-      await fetchTodos();
+      await fetchSharedToMe();
       setOpen(false);
       onClose?.();
+
+      // ✅ SweetAlert sukses
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Todo berhasil diperbarui!",
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (err) {
       console.error("Gagal menyimpan todo", err);
+
+      // ✅ SweetAlert error
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Terjadi kesalahan saat memperbarui todo.",
+      });
     }
   };
 

@@ -61,6 +61,7 @@ export function ShareProvider({ children }: { children: React.ReactNode }) {
   //     throw err;
   //   }
   // };
+
   const unshareTodo = async (shareId: number) => {
     try {
       await axios.delete(`/share-todo/unshare/${shareId}`);

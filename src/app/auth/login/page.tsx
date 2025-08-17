@@ -5,57 +5,107 @@ import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../../../../context/authContext";
 import GuestRoute from "@/app/protect/GuestRoute";
+import Swal from "sweetalert2";
+import { loginSchema } from "./validation/login";
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [passwordHash, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { login } = useContext(AuthContext);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const { error } = loginSchema.validate(
+      { identifier, passwordHash },
+      { abortEarly: false }
+    );
+    if (error) {
+      const newErrors: { [key: string]: string } = {};
+      error.details.forEach((err) => {
+        if (err.context?.key) {
+          newErrors[err.context.key] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
+
     try {
       await login(identifier, passwordHash);
-      router.push("/home");
+      Swal.fire({
+        icon: "success",
+        title: "Login Berhasil",
+        text: "Selamat datang kembali 👋",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+
+      setTimeout(() => {
+        router.push("/home");
+      }, 2000);
     } catch (error) {
       console.error("Login gagal:", error);
-      alert("Login gagal, cek kembali email/username dan password.");
+      Swal.fire({
+        icon: "error",
+        title: "Login Gagal",
+        text: "Periksa kembali email/username dan password.",
+      });
     }
   };
 
   return (
     <GuestRoute>
-      <div className="flex flex-col h-screen justify-center items-center p-4 bg-white">
-        <div className="w-full p-3 bg-zinc-50 max-w-sm space-y-6 text-stone-900 border-2 border-zink-900">
-          <div>
+      <div className="flex min-h-screen justify-center items-center bg-white p-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-red-200 p-8 space-y-6">
+          {/* Logo & Title */}
+          <div className="flex flex-col items-center text-center">
             <img
               src="/logo.png"
               alt="Logo"
-              className="w-64 h-auto object-contain"
+              className="w-28 h-28 object-contain mb-3"
             />
-            <h2 className="text-3xl font-bold">Login to ShareNote</h2>
+            <h2 className="text-2xl font-bold text-stone-900">
+              Login to <span className="text-red-600">ShareNote</span>
+            </h2>
           </div>
 
+          {/* Form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Email/Username"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-zinc-600 rounded-md bg-white"
-            />
+            {/* Email / Username */}
+            <div>
+              <input
+                type="text"
+                placeholder="Email or Username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"
+              />
+              {errors.identifier && (
+                <p className="text-red-500 text-sm mt-1">{errors.identifier}</p>
+              )}
+            </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={passwordHash}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-zinc-600 rounded-md bg-white"
-            />
+            {/* Password */}
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                value={passwordHash}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"
+              />
+              {errors.passwordHash && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.passwordHash}
+                </p>
+              )}
+            </div>
 
+            {/* Forgot Password */}
             <div className="text-right text-sm">
               <Link
                 href="/forgot-password"
@@ -65,15 +115,17 @@ export default function LoginPage() {
               </Link>
             </div>
 
+            {/* Button */}
             <button
               type="submit"
-              className="w-full py-2 bg-red-600 hover:bg-red-700 rounded-full font-semibold transition"
+              className="w-full py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition duration-200"
             >
               Login
             </button>
           </form>
 
-          <p className="text-center text-sm text-zink-900">
+          {/* Footer */}
+          <p className="text-center text-sm text-stone-700">
             Don’t have an account yet?{" "}
             <Link
               href="/auth/register"

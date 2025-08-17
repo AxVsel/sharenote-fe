@@ -95,19 +95,15 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
           </DialogHeader>
 
           <div className="grid gap-4 mt-4">
-            <div className="grid gap-2">
-              <Label htmlFor="todoId">Todo ID</Label>
-              <Input id="todoId" value={formData.todoId} readOnly />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="sharedWithUserId">User ID Tujuan</Label>
-              <Input
-                id="sharedWithUserId"
-                value={formData.sharedWithUserId}
-                readOnly
-              />
-            </div>
+            {/* <Label htmlFor="todoId">Todo ID</Label> */}
+            <Input hidden id="todoId" value={formData.todoId} readOnly />
+            {/* <Label htmlFor="sharedWithUserId">User ID Tujuan</Label> */}
+            <Input
+              id="sharedWithUserId"
+              hidden
+              value={formData.sharedWithUserId}
+              readOnly
+            />
 
             <div className="grid gap-2">
               <Label htmlFor="canEdit">Boleh Edit?</Label>
@@ -122,6 +118,9 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
                 }
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
+                <option disabled selected>
+                  Select
+                </option>
                 <option value="true">Yes</option>
                 <option value="false">No</option>
               </select>
