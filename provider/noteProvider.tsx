@@ -8,11 +8,37 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchTodos = useCallback(async () => {
+  interface FetchTodosOptions {
+    page?: number;
+    limit?: number;
+    sortBy?: "newest" | "oldest";
+    isCompleted?: boolean;
+    priority?: number | "all";
+  }
+
+  const fetchTodos = useCallback(async (options: FetchTodosOptions = {}) => {
     setLoading(true);
     try {
-      const res = await axios.get("/todo/todos");
-      setTodos(res.data.todos || []);
+      const {
+        page = 1,
+        limit = 8,
+        sortBy = "newest",
+        isCompleted,
+        priority,
+      } = options;
+
+      const params: any = {
+        page,
+        limit,
+        sortBy,
+      };
+
+      if (typeof isCompleted === "boolean") params.isCompleted = isCompleted;
+      if (priority !== undefined && priority !== "all")
+        params.priority = priority;
+
+      const res = await axios.get("/todo/todos", { params });
+      setTodos(res.data.data || []); // <- backend return { data, pagination }
     } catch (error) {
       console.error("Gagal fetch todos:", error);
     } finally {

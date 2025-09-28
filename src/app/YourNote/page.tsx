@@ -13,11 +13,26 @@ export default function Note() {
   const { todos, fetchTodos, deleteTodo, loading } = useNote();
   const [selectedTodo, setSelectedTodo] = useState<any | null>(null);
 
-  useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [priority, setPriority] = useState("all");
+  const [page, setPage] = useState(1);
 
-  // delete function with sweetalert confirmation
+  // setiap kali filter berubah, panggil fetchTodos
+  useEffect(() => {
+    fetchTodos({
+      page,
+      sortBy: sortBy as "newest" | "oldest",
+      isCompleted:
+        filterStatus === "completed"
+          ? true
+          : filterStatus === "notCompleted"
+          ? false
+          : undefined,
+      priority: priority !== "all" ? Number(priority) : "all",
+    });
+  }, [fetchTodos, page, sortBy, filterStatus, priority]);
+
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
       title: "Are you sure you want to delete?",
@@ -33,7 +48,13 @@ export default function Note() {
     if (result.isConfirmed) {
       try {
         await deleteTodo(id);
-        await fetchTodos();
+        await fetchTodos({
+          page,
+          sortBy: sortBy as "newest" | "oldest",
+          priority: priority === "all" ? "all" : Number(priority),
+          isCompleted: undefined,
+        });
+
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -57,7 +78,6 @@ export default function Note() {
       }
     }
   };
-
   return (
     <ProtectedRoute>
       <div className="flex flex-col justify-center items-center">
@@ -74,14 +94,67 @@ export default function Note() {
             Add Note
           </Link>
         </div>
+        <div className=" h-auto w-full p-3 rounded-lg flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex gap-3">
+            {/* Filter Completed */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm"
+            >
+              <option value="all">All Todos</option>
+              <option value="completed">Completed</option>
+              <option value="notCompleted">Not Completed</option>
+            </select>
 
+            {/* Priority Filter */}
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm"
+            >
+              <option value="all">All Priority</option>
+              <option value="2">High Priority</option>
+              <option value="1">Medium Priority</option>
+              <option value="0">Low Priority</option>
+            </select>
+
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm"
+            >
+              <option value="newest">Sort by Newest</option>
+              <option value="oldest">Sort by Oldest</option>
+            </select>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center gap-2">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-3 py-1 bg-gray-200 rounded-md disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span className="text-sm">Page {page}</span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              className="px-3 py-1 bg-gray-200 rounded-md"
+            >
+              Next
+            </button>
+          </div>
+        </div>
         {/* Loading & data state */}
         {loading ? (
           <p className="text-gray-500">Loading...</p>
         ) : todos.length === 0 ? (
           <p className="text-gray-500">No notes have been created yet</p>
         ) : (
-          <div className="w-full h-100">
+          <div className="w-full p-5 h-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mt-4">
               {todos.map((todo) => (
                 <div

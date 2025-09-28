@@ -19,7 +19,7 @@ export default function ProtectedRoute({
     }
   }, [isAuthenticated, router]);
 
-  if (!isAuthenticated) return null; // Jangan render apapun sampai cek selesai
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 }

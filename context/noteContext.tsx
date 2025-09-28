@@ -11,10 +11,18 @@ export type Todo = {
   priority: number;
 };
 
+export interface FetchTodosOptions {
+  page?: number;
+  limit?: number;
+  sortBy?: "newest" | "oldest";
+  isCompleted?: boolean;
+  priority?: number | "all";
+}
+
 export type NoteContextType = {
   todos: Todo[];
   loading: boolean;
-  fetchTodos: () => Promise<void>;
+  fetchTodos: (options?: FetchTodosOptions) => Promise<void>;
   addTodo: (data: Omit<Todo, "id" | "isCompleted">) => Promise<void>;
   deleteTodo: (id: number) => Promise<void>;
   updateTodo: (id: number, updates: Partial<Todo>) => Promise<void>;

@@ -12,14 +12,12 @@ export interface ShareContextType {
   error: string | null;
   shareTodo: (data: ShareTodoPayload) => Promise<void>;
 
-  // Tambahan untuk YourShare
   fetchYourShare: () => Promise<void>;
   yourShareTodos: any[];
 
   fetchSharedToMe: () => Promise<void>;
   sharedToMeTodos: any[];
 
-  // Tambahan untuk update permission
   updateShareTodo: (data: {
     todoId: number;
     sharedWithUserId: number;
@@ -33,13 +31,12 @@ export const ShareContext = createContext<ShareContextType>({
   error: null,
   shareTodo: async () => {},
 
-  // Default value tambahan
   fetchYourShare: async () => {},
   yourShareTodos: [],
 
   fetchSharedToMe: async () => {},
   sharedToMeTodos: [],
 
-  updateShareTodo: async () => {}, // tambahkan default
+  updateShareTodo: async () => {},
   unshareTodo: async () => {},
 });

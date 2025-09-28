@@ -48,7 +48,6 @@ export default function YourShare() {
         <h1 className="text-2xl font-bold text-gray-800 mt-6 mb-4">
           Your Shared Notes
         </h1>
-
         {loading ? (
           <p className="text-gray-500">Loading...</p>
         ) : (
