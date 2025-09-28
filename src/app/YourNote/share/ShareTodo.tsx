@@ -46,8 +46,8 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
     if (!emailRegex.test(formData.sharedWithEmail)) {
       return showAlertAfterClose({
         icon: "warning",
-        title: "Format Email Salah",
-        text: "Masukkan format email yang benar.",
+        title: "Invalid Email Format",
+        text: "Please enter a valid email address.",
       });
     }
 
@@ -55,7 +55,7 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
       await shareTodo({
         todoId: Number(formData.todoId),
         sharedWithEmail: formData.sharedWithEmail,
-        canEdit: formData.canEdit, // tetap dikirim (false)
+        canEdit: formData.canEdit,
       });
 
       setFormData({
@@ -66,8 +66,8 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
 
       showAlertAfterClose({
         icon: "success",
-        title: "Berhasil",
-        text: "Todo berhasil dibagikan ✅",
+        title: "Success",
+        text: "Todo has been successfully shared ✅",
       });
     } catch (err: any) {
       const status = err.response?.status;
@@ -75,26 +75,26 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
       if (status === 404) {
         showAlertAfterClose({
           icon: "error",
-          title: "Email Tidak Ditemukan",
-          text: err.response.data.message || "User dengan email ini tidak ada.",
+          title: "Email Not Found",
+          text: err.response.data.message || "No user found with this email.",
         });
       } else if (status === 409) {
         showAlertAfterClose({
           icon: "info",
-          title: "Sudah Dibagikan",
-          text: "Todo sudah dibagikan ke user ini sebelumnya.",
+          title: "Already Shared",
+          text: "This todo has already been shared with this user.",
         });
       } else if (status === 403) {
         showAlertAfterClose({
           icon: "error",
-          title: "Tidak Diizinkan",
+          title: "Not Allowed",
           text: err.response.data.message,
         });
       } else {
         showAlertAfterClose({
           icon: "error",
-          title: "Gagal",
-          text: "Terjadi kesalahan saat membagikan todo.",
+          title: "Failed",
+          text: "An error occurred while sharing the todo.",
         });
       }
     }
@@ -121,7 +121,7 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
           <DialogHeader>
             <DialogTitle>Share Todo</DialogTitle>
             <DialogDescription>
-              Masukkan email tujuan untuk membagikan todo ini.
+              Enter the recipient's email to share this todo.
             </DialogDescription>
           </DialogHeader>
 
@@ -129,14 +129,14 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
             {/* Hidden Todo ID */}
             <input type="hidden" name="todoId" value={formData.todoId} />
 
-            {/* Email Tujuan */}
+            {/* Recipient Email */}
             <div className="grid gap-2">
-              <Label htmlFor="sharedWithEmail">Email Tujuan</Label>
+              <Label htmlFor="sharedWithEmail">Recipient Email</Label>
               <Input
                 id="sharedWithEmail"
                 name="sharedWithEmail"
                 type="email"
-                placeholder="Masukkan email user"
+                placeholder="Enter user email"
                 value={formData.sharedWithEmail}
                 onChange={(e) =>
                   setFormData({
@@ -161,7 +161,7 @@ export function ShareTodo({ todoId }: ShareTodoProps) {
               disabled={loading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {loading ? "Menyimpan..." : "Save"}
+              {loading ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </form>

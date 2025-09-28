@@ -2,30 +2,32 @@
 
 import ProtectedRoute from "../protect/ProtectRoute";
 import { useNote } from "../../../hooks/useNote";
-import { useEffect } from "react";
-import { AddNote } from "./add/noteAdd";
-import { EditNote } from "./edit/noteEdit";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import EditNote from "./edit/noteEdit";
 import { ShareTodo } from "./share/ShareTodo";
 import Swal from "sweetalert2";
+import Link from "next/link";
 
 export default function Note() {
   const { todos, fetchTodos, deleteTodo, loading } = useNote();
+  const [selectedTodo, setSelectedTodo] = useState<any | null>(null);
 
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
 
-  // fungsi hapus dengan konfirmasi sweetalert
+  // delete function with sweetalert confirmation
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "Yakin ingin menghapus?",
-      text: "Data yang sudah dihapus tidak bisa dikembalikan.",
+      title: "Are you sure you want to delete?",
+      text: "Deleted data cannot be recovered.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
-      confirmButtonText: "Ya, hapus",
-      cancelButtonText: "Batal",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
     });
 
     if (result.isConfirmed) {
@@ -34,22 +36,22 @@ export default function Note() {
         await fetchTodos();
         Swal.fire({
           icon: "success",
-          title: "Berhasil",
-          text: "Todo berhasil dihapus.",
+          title: "Success",
+          text: "Todo deleted successfully.",
         });
       } catch (err: any) {
-        console.error("Gagal menghapus todo", err);
+        console.error("Failed to delete todo", err);
         if (err.response?.status === 403) {
           Swal.fire({
             icon: "info",
-            title: "Todo Sedang Dibagikan",
-            text: "Todos sedang di-share ke user lain. Silakan unshare dulu di halaman YourShare.",
+            title: "Todo is Being Shared",
+            text: "This todo is currently shared with another user. Please unshare it first on the YourShare page.",
           });
         } else {
           Swal.fire({
             icon: "error",
-            title: "Gagal",
-            text: "Terjadi kesalahan saat menghapus todo.",
+            title: "Failed",
+            text: "An error occurred while deleting the todo.",
           });
         }
       }
@@ -61,36 +63,27 @@ export default function Note() {
       <div className="flex flex-col justify-center items-center">
         <div className="mt-2">
           <h1 className="text-2xl font-bold text-gray-800 mt-6 mb-4">
-            Your Own Note
+            Your Own Notes
           </h1>
         </div>
         <div className="mt-2">
-          <AddNote />
+          <Link
+            href="/addNote"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out"
+          >
+            Add Note
+          </Link>
         </div>
 
-        {/* Kondisi loading & data */}
+        {/* Loading & data state */}
         {loading ? (
           <p className="text-gray-500">Loading...</p>
         ) : todos.length === 0 ? (
-          <p className="text-gray-500">Belum ada note yang dibuat</p>
+          <p className="text-gray-500">No notes have been created yet</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-4">
-            {todos.map((todo) => {
-              const priorityStyles =
-                todo.priority === 2
-                  ? "bg-red-100 text-red-700"
-                  : todo.priority === 1
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-green-100 text-green-700";
-
-              const priorityLabel =
-                todo.priority === 2
-                  ? "High Priority"
-                  : todo.priority === 1
-                  ? "Medium Priority"
-                  : "Low Priority";
-
-              return (
+          <div className="w-full h-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mt-4">
+              {todos.map((todo) => (
                 <div
                   key={todo.id}
                   className={`bg-white rounded-xl shadow-lg border border-gray-200 p-5 transition-transform transform hover:scale-[1.02] hover:shadow-xl ${
@@ -103,16 +96,26 @@ export default function Note() {
                   </h2>
 
                   {/* Description */}
-                  <p className="text-gray-600 text-sm mt-2 line-clamp-3">
+                  <p className="text-gray-600 text-sm mt-2 line-clamp-3" hidden>
                     {todo.description || "No description available"}
                   </p>
 
                   {/* Priority & Due Date */}
                   <div className="flex items-center justify-between mt-4">
                     <span
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${priorityStyles}`}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        todo.priority === 2
+                          ? "bg-red-100 text-red-700"
+                          : todo.priority === 1
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
                     >
-                      {priorityLabel}
+                      {todo.priority === 2
+                        ? "High Priority"
+                        : todo.priority === 1
+                        ? "Medium Priority"
+                        : "Low Priority"}
                     </span>
                     <span className="text-xs text-gray-500">
                       {todo.dueDate
@@ -123,12 +126,13 @@ export default function Note() {
 
                   {/* Buttons */}
                   <div className="flex justify-end gap-2 mt-5">
-                    <EditNote
-                      todo={todo}
-                      onClose={() => {
-                        fetchTodos();
-                      }}
-                    />
+                    <Button
+                      onClick={() => setSelectedTodo(todo)}
+                      className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out"
+                    >
+                      Edit Note
+                    </Button>
+
                     <ShareTodo todoId={todo.id} />
                     <button
                       onClick={() => handleDelete(todo.id)}
@@ -138,9 +142,19 @@ export default function Note() {
                     </button>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
+        )}
+
+        {selectedTodo && (
+          <EditNote
+            todo={selectedTodo}
+            onClose={() => {
+              setSelectedTodo(null);
+              fetchTodos(); // refresh list after editing
+            }}
+          />
         )}
       </div>
     </ProtectedRoute>

@@ -112,6 +112,17 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.ck-content ol {
+  @apply list-decimal ml-5;
+}
+
+.ck-content ul {
+  @apply list-disc ml-5;
+}
+
+
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

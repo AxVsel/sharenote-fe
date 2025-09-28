@@ -1,38 +1,16 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { useNote } from "../../../../hooks/useNote";
-import Swal from "sweetalert2"; // ✅ Import SweetAlert2
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import Swal from "sweetalert2"; // ✅ for success/error alert
 
-type TodoFormProps = {
-  todo: {
-    id: number;
-    title: string;
-    description?: string;
-    dueDate?: string;
-    priority: number;
-    isCompleted?: boolean;
-  };
-  onClose?: () => void;
-};
+interface EditNoteProps {
+  todo: any;
+  onClose: () => void;
+}
 
-export function EditNote({ todo, onClose }: TodoFormProps) {
+export default function EditNote({ todo, onClose }: EditNoteProps) {
   const { updateTodo, fetchTodos } = useNote();
-  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -41,25 +19,23 @@ export function EditNote({ todo, onClose }: TodoFormProps) {
     isCompleted: false,
   });
 
-  // Isi formData saat modal dibuka
+  // Sync formData when todo changes
   useEffect(() => {
-    if (open && todo) {
+    if (todo) {
       setFormData({
         title: todo.title || "",
         description: todo.description || "",
         dueDate: todo.dueDate
           ? new Date(todo.dueDate).toISOString().split("T")[0]
           : "",
-        priority: todo.priority || 0,
-        isCompleted: todo.isCompleted || false,
+        priority: todo.priority ?? 0,
+        isCompleted: todo.isCompleted ?? false,
       });
     }
-  }, [open, todo]);
+  }, [todo]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
     setFormData((prev) => ({
@@ -77,127 +53,150 @@ export function EditNote({ todo, onClose }: TodoFormProps) {
     e.preventDefault();
     try {
       await updateTodo(todo.id, formData);
-      await fetchTodos();
-      setOpen(false);
-      onClose?.();
+      await fetchTodos?.(); // refresh if available
+      onClose();
 
-      // ✅ SweetAlert sukses
+      // ✅ Success alert
       Swal.fire({
         icon: "success",
-        title: "Berhasil",
-        text: "Catatan berhasil diperbarui!",
-        showConfirmButton: false,
+        title: "Success",
+        text: "Note has been updated successfully!",
         timer: 2000,
+        showConfirmButton: false,
       });
     } catch (err) {
-      console.error("Gagal menyimpan todo", err);
-
-      // ✅ SweetAlert error
+      console.error("Failed to update todo", err);
       Swal.fire({
         icon: "error",
-        title: "Gagal",
-        text: "Terjadi kesalahan saat memperbarui catatan.",
+        title: "Failed",
+        text: "An error occurred while updating the note.",
       });
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md">
-          Edit
-        </Button>
-      </DialogTrigger>
+    <div className="fixed inset-0 flex items-center justify-center bg-opacity-40 z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-3/5 max-w-full">
+        <h2 className="text-xl font-bold mb-4">Edit Note</h2>
 
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Edit Todo</DialogTitle>
-            <DialogDescription>
-              Fill in the details for your todo item.
-            </DialogDescription>
-          </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title */}
+          <div>
+            <label className="block font-medium mb-1">Title</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2"
+              required
+            />
+          </div>
 
-          <div className="grid gap-4">
-            {/* Title */}
-            <div className="grid gap-3">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          {/* Description */}
+          <div>
+            <label className="block font-medium mb-1">Description</label>
+            <CKEditor
+              editor={ClassicEditor as any}
+              data={formData.description}
+              onChange={(_, editor) => {
+                const value = editor.getData();
+                setFormData((prev) => ({ ...prev, description: value }));
+              }}
+              config={{
+                toolbar: [
+                  "heading",
+                  "|",
+                  "bold",
+                  "italic",
+                  "underline",
+                  "strikethrough",
+                  "link",
+                  "bulletedList",
+                  "numberedList",
+                  "blockQuote",
+                  "|",
+                  "alignment",
+                  "outdent",
+                  "indent",
+                  "|",
+                  "fontColor",
+                  "fontBackgroundColor",
+                  "highlight",
+                  "removeFormat",
+                  "|",
+                  "insertTable",
+                  "mediaEmbed",
+                  "imageUpload",
+                  "horizontalLine",
+                  "|",
+                  "undo",
+                  "redo",
+                ],
+              }}
+            />
+          </div>
 
-            {/* Description */}
-            <div className="grid gap-3">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-              />
-            </div>
+          {/* Due Date */}
+          <div>
+            <label className="block font-medium mb-1">Due Date</label>
+            <input
+              type="date"
+              name="dueDate"
+              value={formData.dueDate}
+              onChange={handleChange}
+              min={new Date().toISOString().split("T")[0]}
+              className="w-full border rounded-md px-3 py-2"
+            />
+          </div>
 
-            {/* Due Date */}
-            <div className="grid gap-3">
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input
-                id="dueDate"
-                name="dueDate"
-                type="date"
-                value={formData.dueDate}
-                onChange={handleChange}
-                min={new Date().toISOString().split("T")[0]}
-              />
-            </div>
+          {/* Priority */}
+          <div>
+            <label className="block font-medium mb-1">Priority</label>
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value={0}>Low Priority</option>
+              <option value={1}>Medium Priority</option>
+              <option value={2}>High Priority</option>
+            </select>
+          </div>
 
-            {/* Priority */}
-            <div className="grid gap-3">
-              <Label htmlFor="priority">Priority</Label>
-              <select
-                id="priority"
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={0}>Low Priority</option>
-                <option value={1}>Medium Priority</option>
-                <option value={2}>High Priority</option>
-              </select>
-            </div>
-
-            {/* Completed */}
-            <div className="grid gap-3">
-              <Label htmlFor="isCompleted">Completed</Label>
+          {/* Completed */}
+          <div>
+            <label className="inline-flex items-center gap-2">
               <input
-                id="isCompleted"
-                name="isCompleted"
                 type="checkbox"
+                name="isCompleted"
                 checked={formData.isCompleted}
                 onChange={handleChange}
                 className="w-5 h-5"
               />
-            </div>
+              <span>Completed</span>
+            </label>
           </div>
 
-          <DialogFooter className="mt-4">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+          {/* Buttons */}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-300 rounded-md"
             >
-              Update
-            </Button>
-          </DialogFooter>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md"
+            >
+              Save
+            </button>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

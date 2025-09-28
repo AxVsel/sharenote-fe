@@ -33,12 +33,12 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // Helper untuk menutup modal lalu menampilkan SweetAlert
+  // Helper to close the modal and then show SweetAlert
   const showAlertAfterClose = async (options: any) => {
     setIsOpen(false);
     setTimeout(() => {
       Swal.fire(options);
-    }, 300); // beri jeda agar modal sudah tertutup
+    }, 300); // small delay to ensure modal is closed first
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,18 +54,18 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
 
       showAlertAfterClose({
         icon: "success",
-        title: "Berhasil",
-        text: "Permission berhasil diupdate ✅",
+        title: "Success",
+        text: "Permission updated successfully ✅",
       });
     } catch (err: any) {
       console.error(err);
 
       showAlertAfterClose({
         icon: "error",
-        title: "Gagal",
+        title: "Failed",
         text:
           err.response?.data?.message ||
-          "Terjadi kesalahan saat update permission",
+          "An error occurred while updating permission",
       });
     }
   };
@@ -88,16 +88,14 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Share Todo</DialogTitle>
+            <DialogTitle>Edit Shared Todo</DialogTitle>
             <DialogDescription>
-              Bagikan todo ke user lain dan tentukan izin edit.
+              Update sharing settings and set edit permissions.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 mt-4">
-            {/* <Label htmlFor="todoId">Todo ID</Label> */}
             <Input hidden id="todoId" value={formData.todoId} readOnly />
-            {/* <Label htmlFor="sharedWithUserId">User ID Tujuan</Label> */}
             <Input
               id="sharedWithUserId"
               hidden
@@ -106,7 +104,7 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
             />
 
             <div className="grid gap-2">
-              <Label htmlFor="canEdit">Boleh Edit?</Label>
+              <Label htmlFor="canEdit">Allow Edit?</Label>
               <select
                 id="canEdit"
                 value={formData.canEdit ? "true" : "false"}
@@ -118,9 +116,7 @@ export function ShareEdit({ todoId, sharedWithUserId }: ShareTodoProps) {
                 }
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option disabled selected>
-                  Select
-                </option>
+                <option disabled>Select</option>
                 <option value="true">Yes</option>
                 <option value="false">No</option>
               </select>

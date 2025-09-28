@@ -1,19 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
-type TodoProps = {
+interface InfoNoteModalProps {
   todo: {
     id: number;
     title: string;
@@ -23,10 +15,11 @@ type TodoProps = {
     isCompleted?: boolean;
     isShared?: boolean;
   };
-};
+  onClose: () => void;
+}
 
-export function InfoNote({ todo }: TodoProps) {
-  const [open, setOpen] = useState(false);
+export function InfoNoteModal({ todo, onClose }: InfoNoteModalProps) {
+  const [isOpen, setIsOpen] = useState(true);
 
   const priorityLabel =
     todo.priority === 2
@@ -35,32 +28,39 @@ export function InfoNote({ todo }: TodoProps) {
       ? "Medium Priority"
       : "Low Priority";
 
+  useEffect(() => {
+    if (!isOpen) onClose();
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md">
-          Info
-        </Button>
-      </DialogTrigger>
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-[600px] max-w-full">
+        <h2 className="text-xl font-bold mb-4">Todo Details</h2>
 
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Todo Details</DialogTitle>
-          <DialogDescription>
-            You can view the details of this todo.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-4 text-gray-700">
+        <div className="space-y-4 text-gray-700">
+          {/* Title */}
           <div>
             <span className="font-semibold">Title:</span> {todo.title}
           </div>
 
+          {/* Description */}
           <div>
-            <span className="font-semibold">Description:</span>{" "}
-            {todo.description || "No description"}
+            <span className="font-semibold">Description:</span>
+            <div className="border p-2 rounded-md bg-gray-50 mt-1">
+              <CKEditor
+                editor={ClassicEditor as any}
+                data={todo.description || ""}
+                disabled={true} // read-only
+                config={{
+                  toolbar: [], // kosongkan toolbar
+                }}
+              />
+            </div>
           </div>
 
+          {/* Due Date */}
           <div>
             <span className="font-semibold">Due Date:</span>{" "}
             {todo.dueDate
@@ -68,22 +68,28 @@ export function InfoNote({ todo }: TodoProps) {
               : "No due date"}
           </div>
 
+          {/* Priority */}
           <div>
             <span className="font-semibold">Priority:</span> {priorityLabel}
           </div>
 
+          {/* Completed */}
           <div>
             <span className="font-semibold">Completed:</span>{" "}
             {todo.isCompleted ? "Yes" : "No"}
           </div>
         </div>
 
-        <DialogFooter className="mt-4">
-          <DialogClose asChild>
-            <Button variant="outline">Close</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        {/* Close Button */}
+        <div className="flex justify-end mt-6">
+          <Button
+            onClick={() => setIsOpen(false)}
+            className="px-4 py-2 bg-gray-300 rounded-md"
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

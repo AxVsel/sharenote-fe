@@ -38,8 +38,8 @@ export default function LoginPage() {
       await login(identifier, passwordHash);
       Swal.fire({
         icon: "success",
-        title: "Login Berhasil",
-        text: "Selamat datang kembali 👋",
+        title: "Login Successful",
+        text: "Welcome back 👋",
         showConfirmButton: false,
         timer: 2000,
       });
@@ -48,11 +48,11 @@ export default function LoginPage() {
         router.push("/home");
       }, 2000);
     } catch (error) {
-      console.error("Login gagal:", error);
+      console.error("Login failed:", error);
       Swal.fire({
         icon: "error",
-        title: "Login Gagal",
-        text: "Periksa kembali email/username dan password.",
+        title: "Login Failed",
+        text: "Please check your email/username and password.",
       });
     }
   };

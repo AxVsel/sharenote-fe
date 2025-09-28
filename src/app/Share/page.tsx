@@ -1,44 +1,113 @@
 "use client";
 
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import ProtectedRoute from "../protect/ProtectRoute";
 import { ShareContext } from "../../../context/shareContext";
-import { EditNote } from "./edit/noteEdit";
-import { InfoNote } from "./info/noteInfo";
+import { EditSharedNote } from "./edit/noteEdit";
 import Swal from "sweetalert2";
+import { Button } from "@/components/ui/button";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
+interface InfoNoteModalProps {
+  todo: any;
+  onClose: () => void;
+}
+
+function InfoNoteModal({ todo, onClose }: InfoNoteModalProps) {
+  const priorityLabel =
+    todo.priority === 2
+      ? "High Priority"
+      : todo.priority === 1
+      ? "Medium Priority"
+      : "Low Priority";
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-[600px] max-w-full">
+        <h2 className="text-xl font-bold mb-4">Todo Details</h2>
+
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <span className="font-semibold">Title:</span> {todo.title}
+          </div>
+
+          <div>
+            <span className="font-semibold">Description:</span>
+            <div className="border p-2 rounded-md bg-gray-50 mt-1">
+              <CKEditor
+                editor={ClassicEditor as any}
+                data={todo.description || ""}
+                disabled={true}
+                config={{ toolbar: [] }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <span className="font-semibold">Due Date:</span>{" "}
+            {todo.dueDate
+              ? new Date(todo.dueDate).toLocaleDateString()
+              : "No due date"}
+          </div>
+
+          <div>
+            <span className="font-semibold">Priority:</span> {priorityLabel}
+          </div>
+
+          <div>
+            <span className="font-semibold">Completed:</span>{" "}
+            {todo.isCompleted ? "Yes" : "No"}
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 rounded-md"
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function SharedToMe() {
   const { fetchSharedToMe, sharedToMeTodos, loading, unshareTodo } =
     useContext(ShareContext);
+  const [selectedTodo, setSelectedTodo] = useState<any | null>(null);
+  const [infoTodo, setInfoTodo] = useState<any | null>(null);
 
   useEffect(() => {
-    fetchSharedToMe(); // panggil endpoint /shared-to-me
+    fetchSharedToMe();
   }, [fetchSharedToMe]);
 
   const handleUnshare = async (shareId: number) => {
     try {
       const result = await Swal.fire({
-        title: "Yakin ingin Menghapus?",
-        text: "Todo yang di share akan dihapus dari daftar share kamu.",
+        title: "Are you sure you want to remove?",
+        text: "The shared todo will be removed from your shared list.",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Ya, Hapus!",
-        cancelButtonText: "Batal",
+        confirmButtonText: "Yes, Remove!",
+        cancelButtonText: "Cancel",
       });
 
       if (result.isConfirmed) {
         await unshareTodo(shareId);
         Swal.fire({
           icon: "success",
-          title: "Berhasil",
-          text: "Todo berhasil di Hapus.",
+          title: "Success",
+          text: "Todo has been removed.",
         });
       }
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Gagal",
-        text: "Terjadi kesalahan saat Hapus todo.",
+        title: "Failed",
+        text: "An error occurred while removing the todo.",
       });
     }
   };
@@ -47,7 +116,7 @@ export default function SharedToMe() {
     <ProtectedRoute>
       <div className="flex flex-col justify-center items-center w-full px-6">
         <h1 className="text-2xl font-bold text-gray-800 mt-6 mb-4">
-          Todos Shared To Me
+          Todos Shared With Me
         </h1>
 
         {loading ? (
@@ -80,13 +149,16 @@ export default function SharedToMe() {
                     <h2 className="text-lg font-semibold text-gray-900 truncate">
                       {todo.title}
                     </h2>
-                    <p className="text-gray-700 text-sm mt-2 line-clamp-3">
+                    <p
+                      hidden
+                      className="text-gray-700 text-sm mt-2 line-clamp-3"
+                    >
                       {todo.description || "No description available"}
                     </p>
 
                     <p className="mt-3 text-sm">
                       <span className="font-medium text-gray-600">
-                        Share By:
+                        Shared By:
                       </span>{" "}
                       <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
                         {todo.owner.username}
@@ -110,9 +182,19 @@ export default function SharedToMe() {
 
                     <div className="flex justify-end gap-2 mt-5">
                       {canEdit ? (
-                        <EditNote todo={todo} />
+                        <Button
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md"
+                          onClick={() => setSelectedTodo(todo)}
+                        >
+                          Edit
+                        </Button>
                       ) : (
-                        <InfoNote todo={todo} />
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
+                          onClick={() => setInfoTodo(todo)}
+                        >
+                          Info
+                        </Button>
                       )}
                       <button
                         onClick={() => handleUnshare(shared.id)}
@@ -126,10 +208,23 @@ export default function SharedToMe() {
               })
             ) : (
               <p className="text-gray-500">
-                Belum ada todo yang dibagikan ke kamu.
+                No todos have been shared with you yet.
               </p>
             )}
           </div>
+        )}
+
+        {/* Edit Modal */}
+        {selectedTodo && (
+          <EditSharedNote
+            todo={selectedTodo}
+            onClose={() => setSelectedTodo(null)}
+          />
+        )}
+
+        {/* Info Modal */}
+        {infoTodo && (
+          <InfoNoteModal todo={infoTodo} onClose={() => setInfoTodo(null)} />
         )}
       </div>
     </ProtectedRoute>

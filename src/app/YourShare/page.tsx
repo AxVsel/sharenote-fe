@@ -17,27 +17,27 @@ export default function YourShare() {
   const handleUnshare = async (shareId: number) => {
     try {
       const result = await Swal.fire({
-        title: "Yakin ingin unshare?",
-        text: "Todo akan dihapus dari daftar shared user.",
+        title: "Are you sure you want to unshare?",
+        text: "The note will be removed from the shared user's list.",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Ya, Unshare!",
-        cancelButtonText: "Batal",
+        confirmButtonText: "Yes, Unshare!",
+        cancelButtonText: "Cancel",
       });
 
       if (result.isConfirmed) {
         await unshareTodo(shareId);
         Swal.fire({
           icon: "success",
-          title: "Berhasil",
-          text: "Todo berhasil di-unshare.",
+          title: "Success",
+          text: "The note has been successfully unshared.",
         });
       }
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Gagal",
-        text: "Terjadi kesalahan saat unshare todo.",
+        title: "Failed",
+        text: "An error occurred while unsharing the note.",
       });
     }
   };
@@ -52,7 +52,7 @@ export default function YourShare() {
         {loading ? (
           <p className="text-gray-500">Loading...</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
             {yourShareTodos.length > 0 ? (
               yourShareTodos.map((todo) => (
                 <div
@@ -62,11 +62,13 @@ export default function YourShare() {
                   <h2 className="text-lg font-semibold text-gray-900 truncate">
                     {todo.title}
                   </h2>
-                  <p className="text-gray-700 text-sm mt-2 line-clamp-3">
+                  <p className="text-gray-700 text-sm mt-2 line-clamp-3" hidden>
                     {todo.description}
                   </p>
                   <p className="mt-3 text-sm">
-                    <span className="font-medium text-gray-600">Share To:</span>{" "}
+                    <span className="font-medium text-gray-600">
+                      Shared To:
+                    </span>{" "}
                     <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
                       {todo.sharedToName}
                     </span>
@@ -115,7 +117,7 @@ export default function YourShare() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">Belum ada catatan yang dibagikan.</p>
+              <p className="text-gray-500">No shared notes yet.</p>
             )}
           </div>
         )}

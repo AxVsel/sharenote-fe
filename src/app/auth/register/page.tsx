@@ -49,8 +49,8 @@ export default function Register() {
 
       Swal.fire({
         icon: "success",
-        title: "Registrasi Berhasil",
-        text: "Akun kamu sudah berhasil dibuat!",
+        title: "Registration Successful",
+        text: "Your account has been created!",
         showConfirmButton: false,
         timer: 2000,
       });
@@ -59,12 +59,12 @@ export default function Register() {
         router.push("/home");
       }, 2000);
     } catch (error) {
-      console.error("Register gagal", error);
+      console.error("Registration failed", error);
 
       Swal.fire({
         icon: "error",
-        title: "Registrasi Gagal",
-        text: "Terjadi kesalahan saat membuat akun.",
+        title: "Registration Failed",
+        text: "An error occurred while creating your account.",
       });
     }
   };
@@ -81,7 +81,7 @@ export default function Register() {
               className="w-28 h-28 object-contain mb-3"
             />
             <h2 className="text-2xl font-bold text-stone-900">
-              Create account <span className="text-red-600">ShareNote</span>
+              Create an account <span className="text-red-600">ShareNote</span>
             </h2>
           </div>
 
@@ -101,11 +101,11 @@ export default function Register() {
               )}
             </div>
 
-            {/* Fullname */}
+            {/* Full name */}
             <div>
               <input
                 type="text"
-                placeholder="Fullname"
+                placeholder="Full name"
                 value={fullname}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-4 py-2 border border-zinc-300 rounded-lg bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"
