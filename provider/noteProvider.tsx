@@ -7,6 +7,7 @@ import axios from "../services/axios";
 export function NoteProvider({ children }: { children: React.ReactNode }) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
 
   interface FetchTodosOptions {
     page?: number;
@@ -27,18 +28,14 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
         priority,
       } = options;
 
-      const params: any = {
-        page,
-        limit,
-        sortBy,
-      };
-
+      const params: any = { page, limit, sortBy };
       if (typeof isCompleted === "boolean") params.isCompleted = isCompleted;
       if (priority !== undefined && priority !== "all")
         params.priority = priority;
 
       const res = await axios.get("/todo/todos", { params });
-      setTodos(res.data.data || []); // <- backend return { data, pagination }
+      setTodos(res.data.data || []);
+      setTotalPages(res.data.pagination?.totalPages || 1); // ⬅️ simpan totalPages
     } catch (error) {
       console.error("Gagal fetch todos:", error);
     } finally {
@@ -103,6 +100,7 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
       value={{
         todos,
         loading,
+        totalPages,
         fetchTodos,
         addTodo,
         deleteTodo,

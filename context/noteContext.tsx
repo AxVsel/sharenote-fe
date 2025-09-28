@@ -22,6 +22,7 @@ export interface FetchTodosOptions {
 export type NoteContextType = {
   todos: Todo[];
   loading: boolean;
+  totalPages: number;
   fetchTodos: (options?: FetchTodosOptions) => Promise<void>;
   addTodo: (data: Omit<Todo, "id" | "isCompleted">) => Promise<void>;
   deleteTodo: (id: number) => Promise<void>;
@@ -32,6 +33,7 @@ export type NoteContextType = {
 export const NoteContext = createContext<NoteContextType>({
   todos: [],
   loading: false,
+  totalPages: 0,
   fetchTodos: async () => {},
   addTodo: async () => {},
   deleteTodo: async () => {},
