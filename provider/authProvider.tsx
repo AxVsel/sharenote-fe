@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import type { AuthContextType } from "../context/authContext";
 import axios from "../services/axios";
@@ -8,19 +8,24 @@ import axios from "../services/axios";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const login = async (identifier: string, password: string) => {
+  // Cek token saat pertama kali load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const login = async (identifier: string, passwordHash: string) => {
     try {
       const response = await axios.post("/auth/login", {
         identifier,
-        password,
+        passwordHash,
       });
-
-      // Token sudah di cookie httpOnly, tapi kalau mau simpan juga bisa ambil dari response
       const { token } = response.data.user;
 
-      // Simpan token di localStorage (optional, tapi backend juga set cookie)
+      // Simpan token
       localStorage.setItem("token", token);
-
       setIsAuthenticated(true);
     } catch (error) {
       console.error("Login gagal", error);
@@ -30,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await axios.post("/auth/logout", {}, { withCredentials: true });
+    localStorage.removeItem("token");
     setIsAuthenticated(false);
   };
 
@@ -38,9 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       headers: { "Content-Type": "application/json" },
     });
     const { token } = response.data.user;
-
     localStorage.setItem("token", token);
-
     setIsAuthenticated(true);
   };
 
